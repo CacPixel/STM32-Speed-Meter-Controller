@@ -4,6 +4,7 @@
 #include "string.h"
 #include "gpio.h"
 #include "stdlib.h"
+#include "stdio.h"
 
 uint8_t rxbuf[RX_LENGTH] = { 0 };
 uint8_t command[RX_LENGTH] = { 0 };
@@ -155,45 +156,48 @@ CommandTypeDef runUARTCommand(UART_HandleTypeDef* huart, uint8_t* command) {
 }
 
 void getOutputMsg(char* msg, const char* startMsg) {
-    char temp[16] = { 0 };
-    int8_t speedIntergerPart = 0;
-    int16_t speedDecimalPart = 0;
-    int8_t speedDecimalPartFinal = 0;
 
-
-    //sprintf(msg + strlen(msg), "%.2f", 114.514);
-    //dont use sprintf in irqhandler
-    speedIntergerPart = (int8_t)speed;
-    speedDecimalPart = (int16_t)((speed - (float)speedIntergerPart) * 1000.0);
-    speedDecimalPartFinal = speedDecimalPart % 10;
-    speedDecimalPart = (speedDecimalPartFinal < 5) ? \
-        speedDecimalPart / 10 : \
-        speedDecimalPart / 10 + 1;
-
-    clearMsg(msg, 128);
-    strcat(msg, "/");
-    strcat(msg, startMsg);
-    strcat(msg, ":speed=");
-    itoa_user((int)speedIntergerPart, temp, 10);
-    strcat(msg, temp);
-    strcat(msg, ".");
-    itoa_user((int)speedDecimalPart, temp, 10);
-    if (speedDecimalPart < 10) {
-        temp[2] = 0;
-        temp[1] = temp[0];
-        temp[0] = '0';
-    }
-    strcat(msg, temp);
-    strcat(msg, ",CCR=");
-    itoa_user((int)TIM4->CCR1, temp, 10);
-    strcat(msg, temp);
-    strcat(msg, ",PSC=");
-    itoa_user((int)TIM4->PSC, temp, 10);
-    strcat(msg, temp);
-    strcat(msg, ",ARR=");
-    itoa_user((int)TIM4->ARR, temp, 10);
-    strcat(msg, temp);
-    strcat(msg, ";\r\n\0");
+	sprintf((char*)msg, "/status:speed=%.2f,CCR=%u,PSC=%u,ARR=%u;\r\n", \
+	      speed, TIM4->CCR1, TIM4->PSC, TIM4->ARR);
+//    char temp[16] = { 0 };
+//    int8_t speedIntergerPart = 0;
+//    int16_t speedDecimalPart = 0;
+//    int8_t speedDecimalPartFinal = 0;
+//
+//
+//    //sprintf(msg + strlen(msg), "%.2f", 114.514);
+//    //dont use sprintf in irqhandler
+//    speedIntergerPart = (int8_t)speed;
+//    speedDecimalPart = (int16_t)((speed - (float)speedIntergerPart) * 1000.0);
+//    speedDecimalPartFinal = speedDecimalPart % 10;
+//    speedDecimalPart = (speedDecimalPartFinal < 5) ? \
+//        speedDecimalPart / 10 : \
+//        speedDecimalPart / 10 + 1;
+//
+//    clearMsg(msg, 128);
+//    strcat(msg, "/");
+//    strcat(msg, startMsg);
+//    strcat(msg, ":speed=");
+//    itoa_user((int)speedIntergerPart, temp, 10);
+//    strcat(msg, temp);
+//    strcat(msg, ".");
+//    itoa_user((int)speedDecimalPart, temp, 10);
+//    if (speedDecimalPart < 10) {
+//        temp[2] = 0;
+//        temp[1] = temp[0];
+//        temp[0] = '0';
+//    }
+//    strcat(msg, temp);
+//    strcat(msg, ",CCR=");
+//    itoa_user((int)TIM4->CCR1, temp, 10);
+//    strcat(msg, temp);
+//    strcat(msg, ",PSC=");
+//    itoa_user((int)TIM4->PSC, temp, 10);
+//    strcat(msg, temp);
+//    strcat(msg, ",ARR=");
+//    itoa_user((int)TIM4->ARR, temp, 10);
+//    strcat(msg, temp);
+//    strcat(msg, ";\r\n\0");
 }
 
 void itoa_user(int num_in, char* str, uint8_t useless) {
